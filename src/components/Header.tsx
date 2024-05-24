@@ -1,18 +1,19 @@
-import type { CartItem, Guitar } from "../types"
+import { useMemo, Dispatch } from "react"
+import type { CartItem } from "../types"  
+import { CartActions } from "../reducers/cart-reducer"
 
 type HeaderProps = {
   cart: CartItem[]
-  remoteFromCart: (id: Guitar['id']) => void
-  decreaseQuantity: (id: Guitar['id']) => void
-  increaseQuantity: (id: Guitar['id']) => void
-  cleanCart: () => void
-  isEmpty: boolean
-  cartTotal: number
+  dispatch: Dispatch<CartActions>    
 }
 
 export default function Header(
-  { cart, remoteFromCart, decreaseQuantity, increaseQuantity, cleanCart, isEmpty, cartTotal }: HeaderProps
+  { cart, dispatch }: HeaderProps
 ) {
+
+  // State Derivado 
+  const isEmpty = useMemo(() => cart.length === 0, [cart])
+  const cartTotal = useMemo(() => cart.reduce((total, item) => total + (item.quantity * item.price), 0), [cart])
 
   return (
     <header className="py-5 header">
@@ -63,7 +64,7 @@ export default function Header(
                               <button
                                 type="button"
                                 className="btn btn-dark"
-                                onClick={() => decreaseQuantity(guitar.id)}
+                                onClick={() => dispatch({type: 'decrease-quantity', payload: {id: guitar.id} })}
                               >
                                 -
                               </button>
@@ -71,7 +72,7 @@ export default function Header(
                               <button
                                 type="button"
                                 className="btn btn-dark"
-                                onClick={() => increaseQuantity(guitar.id)}
+                                onClick={() => dispatch({type: 'increase-quantity', payload: {id: guitar.id} }) }
                               >
                                 +
                               </button>
@@ -80,7 +81,7 @@ export default function Header(
                               <button
                                 className="btn btn-danger"
                                 type="button"
-                                onClick={() => remoteFromCart(guitar.id)}
+                                onClick={() => dispatch({type: 'remove-from-cart', payload: {id: guitar.id}}) }
                               >
                                 X
                               </button>
@@ -95,7 +96,7 @@ export default function Header(
                     <p className="text-end">Total pagar: <span className="fw-bold">${cartTotal}</span></p>
                     <button
                       className="btn btn-dark w-100 mt-3 p-2"
-                      onClick={cleanCart}
+                      onClick={() => dispatch({type: 'clear-car'})}
                     >
                       Vaciar Carrito
                     </button>
